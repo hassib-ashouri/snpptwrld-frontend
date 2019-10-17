@@ -3,5 +3,12 @@ phases:
     install:
         commands:
         - npm install
+        - echo "Finished installing packages"
+    build:
+        commands:
         - npm run build
-        - aws s3 sync public s3://staging.snpptwrld.com --delete --acl public-read
+        - echo "Finished building the static website"
+    post_build:
+        commands:
+        - aws s3 sync public s3://$BUCKET_NAME --delete --acl public-read
+        - echo "Finished syncing with the S3 bucket- $BUCKET_NAME"
