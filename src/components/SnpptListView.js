@@ -1,22 +1,25 @@
-import React from "react"
-//import { spacing } from '@material-ui/system';
-import Container from "@material-ui/core/Container"
+import React, { useState } from "react"
 import Card from "@material-ui/core/Card"
 import CardActions from "@material-ui/core/CardActions"
-import CardContent from "@material-ui/core/CardContent"
 import Button from "@material-ui/core/Button"
-import Box from "@material-ui/core/Box"
 import Grid from "@material-ui/core/Grid"
-import Typography from "@material-ui/core/Typography"
 import { CardHeader } from "@material-ui/core"
-import { makeStyles, useTheme } from "@material-ui/core/styles"
+import { makeStyles } from "@material-ui/core/styles"
+import SnpptViewDialog from "../components/SnpptViewDialog"
 
 const useStyles = makeStyles(theme => ({
   // sttyling for this component is here
 }))
 
 export default function SnpptListView(props) {
-  const { items } = props
+  const { items, snpptViewHandler } = props
+  const [open, setOpen] = useState(false)
+  const [snpptViewerData, setSnpptViewerData] = useState({ id: "default ip" })
+  const displaySnpptHandler = snpptId => () => {
+    setSnpptViewerData({ id: snpptId })
+    setOpen(true)
+  }
+  const handleClose = () => setOpen(false)
   const classes = useStyles()
   const fakeSnppts = [
     {
@@ -44,21 +47,33 @@ export default function SnpptListView(props) {
       lang: "Java Script",
     },
   ]
+  // view mock data unless data is provided by the parent
   const snppts = items == undefined || items.length == 0 ? fakeSnppts : items
   return (
-    <Grid container spacing={3}>
-      {snppts.map(snppt => (
-        <Grid item xs={12}>
-          <Card className={classes.card}>
-            <CardHeader title={snppt.title} subheader="by this dude" />
-            <CardActions>
-              <Button size="small" color="primary">
-                Display
-              </Button>
-            </CardActions>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
+    <>
+      <SnpptViewDialog
+        onClose={handleClose}
+        snpptid={snpptViewerData.id}
+        open={open}
+      />
+      <Grid container spacing={3}>
+        {snppts.map(snppt => (
+          <Grid item xs={12}>
+            <Card className={classes.card}>
+              <CardHeader title={snppt.title} subheader="by this dude" />
+              <CardActions>
+                <Button
+                  size="small"
+                  color="primary"
+                  onClick={displaySnpptHandler(snppt.id)}
+                >
+                  Display
+                </Button>
+              </CardActions>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </>
   )
 }
