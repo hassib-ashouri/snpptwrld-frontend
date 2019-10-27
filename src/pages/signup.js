@@ -12,12 +12,14 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import * as AuthUtils from '../components/loginUtils';
+import { navigate } from '@reach/router';
 
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
+      <Link color="inherit" href="/">
         Your Website
       </Link>{' '}
       {new Date().getFullYear()}
@@ -62,10 +64,18 @@ export default function SignUp() {
     setFormInfo(newFormInfoData);
   };
 
-  const submitForm = () => {
+  const submitForm = async () => {
     console.log("submitted a form");
+    AuthUtils.signUp(formInfo).then( 
+    user => {
+      console.log("new user", user.getUsername());
+      navigate('/login');
+    }, 
+    err => {
+      console.log(err.message || JSON.stringify(err));
+    });
   }
-  
+
   useEffect(() => 
   {
     console.log(formInfo);
@@ -161,8 +171,7 @@ export default function SignUp() {
           </Grid>
           <Button
             fullWidth
-            type="submit"
-            onSubmit={submitForm}
+            onClick={submitForm}
             variant="contained"
             color="primary"
             className={classes.submit}

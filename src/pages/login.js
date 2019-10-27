@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -12,12 +12,14 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import * as LoginUtils from '../components/loginUtils';
+import { navigate } from '@reach/router';
 
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
-      <Link color="inherit" href="#">
+      <Link color="inherit" href="/">
         Snpptwrld.com
       </Link>{' '}
       {new Date().getFullYear()}
@@ -53,6 +55,29 @@ const useStyles = makeStyles(theme => ({
 
 export default function LogInPage() {
   const classes = useStyles();
+  const [formInputData, setFormInputData] = useState({});
+  // handler to update state when input fields are filled
+  const inputDataHandler = dataKey => event => {
+    let newFormInputData = {...formInputData};
+    newFormInputData[dataKey] = event.target.value;
+    setFormInputData(newFormInputData);
+  }
+
+  const signInHandler = () => {
+    // form validateion can happen here
+    console.log("Logging in as", formInputData.username);
+    LoginUtils.logIn(formInputData).then( session => {
+      console.log("User Logged in successfull", JSON.stringify(session))
+      navigate('/', {isLoggedIn: true, sessionToken: session});
+    },
+    error => {
+      console.error(error.message || JSON.stringify(error));
+    });
+  };
+
+  useEffect(() => {
+    console.log(formInputData);
+  })
 
   return (
     <Container component="main" maxWidth="xs">
@@ -70,10 +95,11 @@ export default function LogInPage() {
             margin="normal"
             required
             fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
+            id="username"
+            label="Username"
+            name="username"
+            autoComplete="username"
+            onChange={inputDataHandler("username")}
             autoFocus
           />
           <TextField
@@ -85,6 +111,7 @@ export default function LogInPage() {
             label="Password"
             type="password"
             id="password"
+            onChange={inputDataHandler('password')}
             autoComplete="current-password"
           />
           <FormControlLabel
@@ -92,7 +119,7 @@ export default function LogInPage() {
             label="Remember me"
           />
           <Button
-            type="submit"
+            onClick={signInHandler}
             fullWidth
             variant="contained"
             color="primary"

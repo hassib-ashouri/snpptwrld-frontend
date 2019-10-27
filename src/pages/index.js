@@ -15,6 +15,8 @@ import SearchIcon from "@material-ui/icons/Search"
 import Toolbar from "@material-ui/core/Toolbar"
 import Typography from "@material-ui/core/Typography"
 import { makeStyles, fade } from "@material-ui/core/styles"
+import * as LoginUtils from '../components/loginUtils';
+import { navigate } from "@reach/router"
 
 const drawerWidth = 240
 
@@ -77,40 +79,47 @@ const useStyles = makeStyles(theme => ({
       width: 200,
     },
   },
-}))
+}));
+
+const fakeSnppts = [
+  {
+    id: "1",
+    title: "Ext. A sample javas snppt",
+    resource: "/lskdjf",
+    lang: "Java",
+  },
+  {
+    id: "2",
+    title: "Ext. A sample Python snppt",
+    resource: "/lskdj",
+    lang: "Python",
+  },
+  {
+    id: "3",
+    title: "Ext. A sample Bash snppt",
+    resource: "/lskdjf",
+    lang: "Bash",
+  },
+  {
+    id: "4",
+    title: "Ext. A sample Java script snppt",
+    resource: "/lskdjf",
+    lang: "Java Script",
+  },
+];
+
 
 function App(props) {
   const { container, passedSnppts } = props
   const classes = useStyles()
-  const [checked, setChecked] = useState([])
+  const [checked, setChecked] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState('isLoggedIn' in props ? props.isLoggedIn: LoginUtils.wasDeviceLoggedIn());
+  // the session is prob will be the idtoken
+  // if it found in the props, that means it is a redirect from login page
+  const [session, setSession] = useState('sessionToken' in props ? props.sessionToken : null);
   // the list of snippets
   const filters = ["Java", "Python", "Java Script", "Bash"]
-  const fakeSnppts = [
-    {
-      id: "1",
-      title: "Ext. A sample javas snppt",
-      resource: "/lskdjf",
-      lang: "Java",
-    },
-    {
-      id: "2",
-      title: "Ext. A sample Python snppt",
-      resource: "/lskdj",
-      lang: "Python",
-    },
-    {
-      id: "3",
-      title: "Ext. A sample Bash snppt",
-      resource: "/lskdjf",
-      lang: "Bash",
-    },
-    {
-      id: "4",
-      title: "Ext. A sample Java script snppt",
-      resource: "/lskdjf",
-      lang: "Java Script",
-    },
-  ]
+  
   const [snppts, setSnppts] = useState(
     passedSnppts === undefined ? fakeSnppts : passedSnppts
   )
@@ -139,6 +148,19 @@ function App(props) {
       )
       setFilteredSnppts(newSnpptsOrder)
     }
+  };
+
+  const loginHandler = type => () => {
+    if(type == 'login')
+    {
+      navigate('/login');
+    }
+    else if (type === 'logout')
+    {
+      // call a certain function
+      LoginUtils.logUserOut();
+      // refresh the page
+    }
   }
 
   useEffect(() => {
@@ -146,6 +168,23 @@ function App(props) {
     console.log(filteredSnppts)
   })
 
+  const loginListItem = isLoggedIn
+    ? (
+        <ListItem button key={"logout"} onClick={loginHandler("logout")}>
+          <ListItemIcon>
+            <MailIcon />
+          </ListItemIcon>
+          <ListItemText primary={'Log Out'} />
+        </ListItem>
+    )
+    : (
+      <ListItem button key={"login"} onClick={loginHandler("login")}>
+          <ListItemIcon>
+            <MailIcon />
+          </ListItemIcon>
+          <ListItemText primary={'Log In'} />
+        </ListItem>
+    );
   const drawer = (
     <div>
       <div className={classes.toolbar} />
@@ -175,6 +214,10 @@ function App(props) {
             <ListItemText primary={btnTxt} />
           </ListItem>
         ))}
+        <Divider />
+        {
+          loginListItem
+        }
       </List>
     </div>
   )
