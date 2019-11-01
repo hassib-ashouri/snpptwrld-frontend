@@ -15,6 +15,8 @@ import SearchIcon from "@material-ui/icons/Search"
 import Toolbar from "@material-ui/core/Toolbar"
 import Typography from "@material-ui/core/Typography"
 import { makeStyles, fade } from "@material-ui/core/styles"
+import * as LoginUtils from '../components/loginUtils';
+import { navigate } from "@reach/router"
 
 const drawerWidth = 240
 
@@ -77,40 +79,63 @@ const useStyles = makeStyles(theme => ({
       width: 200,
     },
   },
-}))
+}));
+
+const fakeSnppts = [
+  {
+    id: "1",
+    title: "Ext. A sample javas snppt",
+    resource: "/lskdjf",
+    lang: "Java",
+  },
+  {
+    id: "2",
+    title: "Ext. A sample Python snppt",
+    resource: "/lskdj",
+    lang: "Python",
+  },
+  {
+    id: "3",
+    title: "Ext. A sample Bash snppt",
+    resource: "/lskdjf",
+    lang: "Bash",
+  },
+  {
+    id: "4",
+    title: "Ext. A sample Java script snppt",
+    resource: "/lskdjf",
+    lang: "Java Script",
+  },
+];
+
 
 function App(props) {
-  const { container, passedSnppts } = props
-  const classes = useStyles()
-  const [checked, setChecked] = useState([])
+  // destructuring the passed data
+  // defaulting on destructuring kicks in when the value is undefined
+  // location.state is null when it is empty.
+  if(props.location.state === null) props.location.state = undefined;
+  const { 
+    container,
+    passedSnppts,
+    location: {
+      state: {
+        st_isLoggedIn,
+        name,
+      } = {
+        st_isLoggedIn: false,
+        name: "",
+      }
+    }
+  } = props;
+
+  const [isLoggedIn, setIsLoggedIn] = useState(st_isLoggedIn);
+  const [userInfo, setUserInfo] = useState({name:name});
+  const classes = useStyles();
+  const [checked, setChecked] = useState([]);
+
   // the list of snippets
-  const filters = ["Java", "Python", "Java Script", "Bash"]
-  const fakeSnppts = [
-    {
-      id: "1",
-      title: "Ext. A sample javas snppt",
-      resource: "/lskdjf",
-      lang: "Java",
-    },
-    {
-      id: "2",
-      title: "Ext. A sample Python snppt",
-      resource: "/lskdj",
-      lang: "Python",
-    },
-    {
-      id: "3",
-      title: "Ext. A sample Bash snppt",
-      resource: "/lskdjf",
-      lang: "Bash",
-    },
-    {
-      id: "4",
-      title: "Ext. A sample Java script snppt",
-      resource: "/lskdjf",
-      lang: "Java Script",
-    },
-  ]
+  const filters = ["Java", "Python", "Java Script", "Bash"];
+  
   const [snppts, setSnppts] = useState(
     passedSnppts === undefined ? fakeSnppts : passedSnppts
   )
@@ -139,13 +164,84 @@ function App(props) {
       )
       setFilteredSnppts(newSnpptsOrder)
     }
+  };
+
+  const loginHandler = type => () => {
+    switch(type)
+    {
+      case 'login':
+        LoginUtils.wasDeviceLoggedIn()
+        .then(
+          result =>
+          {
+            setIsLoggedIn(true);
+            setUserInfo({name: result.name});
+            navigate('/', {state:{st_isLoggedIn:false,}})
+          },
+          reason =>
+          {
+            console.log(reason);
+            navigate('/login');
+          }
+        );
+        break;
+
+      case 'logout':
+        // call a certain function
+        if(LoginUtils.logUserOut())
+        {
+          // change the state
+          setIsLoggedIn(false);
+        }
+        else
+        {
+          setIsLoggedIn(false);
+          alert("User did not logout");
+        }
+        break;
+
+      case 'signup':
+          navigate('/signup');
+    }
   }
 
   useEffect(() => {
     // use this for debugging
-    console.log(filteredSnppts)
   })
 
+  const loginListItem = isLoggedIn
+    ? (
+      <>
+      <ListItem>
+        <ListItemIcon>
+          <MailIcon />
+        </ListItemIcon>
+        <ListItemText primary={`Hello, ${userInfo.name}`} />
+      </ListItem>
+      <ListItem button key={"logout"} onClick={loginHandler("logout")}>
+        <ListItemIcon>
+          <MailIcon />
+        </ListItemIcon>
+        <ListItemText primary={'Log Out'} />
+      </ListItem>
+      </>
+    )
+    : (
+      <>
+      <ListItem button key={"login"} onClick={loginHandler("login")}>
+        <ListItemIcon>
+          <MailIcon />
+        </ListItemIcon>
+        <ListItemText primary={'Log In'} />
+      </ListItem>
+      <ListItem button key={"signup"} onClick={loginHandler("signup")}>
+      <ListItemIcon>
+        <MailIcon />
+      </ListItemIcon>
+      <ListItemText primary={'Sign Up'} />
+    </ListItem>
+    </>
+    );
   const drawer = (
     <div>
       <div className={classes.toolbar} />
@@ -175,6 +271,10 @@ function App(props) {
             <ListItemText primary={btnTxt} />
           </ListItem>
         ))}
+        <Divider />
+        {
+          loginListItem
+        }
       </List>
     </div>
   )
