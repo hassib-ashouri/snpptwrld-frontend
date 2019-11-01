@@ -23,19 +23,62 @@ const userPool = new CognitoUserPool({
  * see if this device was logged in before
  * @returns {bool} whether the device was logged in or not.
  */
- export function wasDeviceLoggedIn()
+ export async function wasDeviceLoggedIn()
 {
-    // this should return to me weather this device was logged in.
-    // CognitoUser.getDevice({
-    //     onSuccess: success => {
-    //         console.log('call result: ' + success);
-    //     },
-    //     onFailure: err => {
-    //         alert(err.message || JSON.stringify(err));
-    //     }
-    // });
+    return new Promise((resolve, reject) => {
+        
+        let user = userPool.getCurrentUser();
+        if(user !== null)
+        {
+            user.getSession(
+                (err, session) => 
+                {
+                    if (err)
+                    {
+                        throw err.message || JSON.stringify(err);
+                    }
+        
+                    console.log("Session Validity", session.isValid());
+                    // recreate credentials from the token.
+                    // needed in case user reopens the website after closing it
+                    config.credentials = new CognitoIdentityCredentials(
+                    {
+                        IdentityPoolId: awsConfig.cognito.IDENTITY_POOL_ID, // your identity pool id here
+                        Logins: {
+                            // Change the key below according to the specific region your user pool is in.
+                            [`cognito-idp.${awsConfig.cognito.REGION}.amazonaws.com/${awsConfig.cognito.USER_POOL_ID}`]: session.getIdToken().getJwtToken(),
+                        },
+                    });
+                });
+            
+            // authenticate using the updated credentials
+            config.credentials.refresh(
+                err => 
+                {
+                    if(err)
+                    {
+                        throw err.message || JSON.stringify(err);
+                    }
 
-    return false;
+                    console.log("Logged in with no broblem");
+                });
+            
+            user.getUserAttributes(
+                (err, attributes) => 
+                {
+                    if(err)
+                    {
+                        throw err.message || JSON.stringify(err);
+                    }
+                    let [,, nameAtt] = attributes;
+                    resolve({wasLoggedIn: true, name: nameAtt.Value});
+                });
+        }
+        else
+        { 
+            reject("No valid tokens in storage.");
+        }
+    });
 }
 
 /**
@@ -92,7 +135,9 @@ export async function logIn(userCredentials)
         });
 
         congnitoUser.authenticateUser(authenticaitonDetails, {
-            onSuccess: result => {
+            onSuccess: result => 
+            {
+                console.log(result);
                 // get the session data
                 let accessToken = result.getAccessToken().getJwtToken();
                 let idToken = result.getIdToken().getJwtToken();
@@ -106,22 +151,34 @@ export async function logIn(userCredentials)
                 });
                 
                 //refreshes credentials using AWS.CognitoIdentity.getCredentialsForIdentity()
-		        config.credentials.refresh(error => {
-                    if (error) 
+		        config.credentials.refresh(
+                    error => 
                     {
-                        reject(error);
-                    } 
-                    else 
+                        if (error) 
+                        {
+                            reject(error.message || JSON.stringify(error));
+                            return;
+                        }
+
+                    });
+                    
+                congnitoUser.getUserAttributes(
+                    (err, atts) =>
                     {
-                        // Instantiate aws sdk service objects now that the credentials have been updated.
-                        // example: var s3 = new AWS.S3();
-                        resolve(accessToken);
-                    }
-                });
+                        if (err) 
+                        {
+                            reject(err.message || JSON.stringify(err))
+                            return;
+                        }
+                        let [,, nameAtt] = atts;
+                        console.log(atts);
+                        resolve({session: accessToken, name: nameAtt.Value});
+                    });
                 
             },
             onFailure: err => {
-                reject(err);
+                reject(err.message || JSON.stringify(err));
+                return;
             }
         });
     });
@@ -130,5 +187,11 @@ export async function logIn(userCredentials)
 // log the current user out
 export function logUserOut()
 {
-
+    let user = userPool.getCurrentUser();
+    if(user !== null)
+    {
+        user.signOut();
+        return true;
+    }
+    return false;
 }

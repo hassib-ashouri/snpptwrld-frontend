@@ -66,9 +66,16 @@ export default function LogInPage() {
   const signInHandler = () => {
     // form validateion can happen here
     console.log("Logging in as", formInputData.username);
-    LoginUtils.logIn(formInputData).then( session => {
-      console.log("User Logged in successfull", JSON.stringify(session))
-      navigate('/', {isLoggedIn: true, sessionToken: session});
+    LoginUtils.logIn(formInputData).then( ({session, name}) => {
+      console.log("User Logged in successfull", name);
+      navigate('/', {
+        state: {
+          st_isLoggedIn: true, 
+          name:name, 
+          session: session,
+          username: formInputData.username
+        }
+      });
     },
     error => {
       console.error(error.message || JSON.stringify(error));

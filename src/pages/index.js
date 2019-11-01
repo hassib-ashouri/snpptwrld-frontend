@@ -110,15 +110,31 @@ const fakeSnppts = [
 
 
 function App(props) {
-  const { container, passedSnppts } = props
-  const classes = useStyles()
+  // destructuring the passed data
+  // defaulting on destructuring kicks in when the value is undefined
+  // location.state is null when it is empty.
+  if(props.location.state === null) props.location.state = undefined;
+  const { 
+    container,
+    passedSnppts,
+    location: {
+      state: {
+        st_isLoggedIn,
+        name,
+      } = {
+        st_isLoggedIn: false,
+        name: "",
+      }
+    }
+  } = props;
+
+  const [isLoggedIn, setIsLoggedIn] = useState(st_isLoggedIn);
+  const [userInfo, setUserInfo] = useState({name:name});
+  const classes = useStyles();
   const [checked, setChecked] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState('isLoggedIn' in props ? props.isLoggedIn: LoginUtils.wasDeviceLoggedIn());
-  // the session is prob will be the idtoken
-  // if it found in the props, that means it is a redirect from login page
-  const [session, setSession] = useState('sessionToken' in props ? props.sessionToken : null);
+
   // the list of snippets
-  const filters = ["Java", "Python", "Java Script", "Bash"]
+  const filters = ["Java", "Python", "Java Script", "Bash"];
   
   const [snppts, setSnppts] = useState(
     passedSnppts === undefined ? fakeSnppts : passedSnppts
@@ -151,39 +167,80 @@ function App(props) {
   };
 
   const loginHandler = type => () => {
-    if(type == 'login')
+    switch(type)
     {
-      navigate('/login');
-    }
-    else if (type === 'logout')
-    {
-      // call a certain function
-      LoginUtils.logUserOut();
-      // refresh the page
+      case 'login':
+        LoginUtils.wasDeviceLoggedIn()
+        .then(
+          result =>
+          {
+            setIsLoggedIn(true);
+            setUserInfo({name: result.name});
+            navigate('/', {state:{st_isLoggedIn:false,}})
+          },
+          reason =>
+          {
+            console.log(reason);
+            navigate('/login');
+          }
+        );
+        break;
+
+      case 'logout':
+        // call a certain function
+        if(LoginUtils.logUserOut())
+        {
+          // change the state
+          setIsLoggedIn(false);
+        }
+        else
+        {
+          setIsLoggedIn(false);
+          alert("User did not logout");
+        }
+        break;
+
+      case 'signup':
+          navigate('/signup');
     }
   }
 
   useEffect(() => {
     // use this for debugging
-    console.log(filteredSnppts)
   })
 
   const loginListItem = isLoggedIn
     ? (
-        <ListItem button key={"logout"} onClick={loginHandler("logout")}>
-          <ListItemIcon>
-            <MailIcon />
-          </ListItemIcon>
-          <ListItemText primary={'Log Out'} />
-        </ListItem>
+      <>
+      <ListItem>
+        <ListItemIcon>
+          <MailIcon />
+        </ListItemIcon>
+        <ListItemText primary={`Hello, ${userInfo.name}`} />
+      </ListItem>
+      <ListItem button key={"logout"} onClick={loginHandler("logout")}>
+        <ListItemIcon>
+          <MailIcon />
+        </ListItemIcon>
+        <ListItemText primary={'Log Out'} />
+      </ListItem>
+      </>
     )
     : (
+      <>
       <ListItem button key={"login"} onClick={loginHandler("login")}>
-          <ListItemIcon>
-            <MailIcon />
-          </ListItemIcon>
-          <ListItemText primary={'Log In'} />
-        </ListItem>
+        <ListItemIcon>
+          <MailIcon />
+        </ListItemIcon>
+        <ListItemText primary={'Log In'} />
+      </ListItem>
+      <ListItem button key={"signup"} onClick={loginHandler("signup")}>
+      <ListItemIcon>
+        <MailIcon />
+      </ListItemIcon>
+      <ListItemText primary={'Sign Up'} />
+    </ListItem>
+    </>
     );
   const drawer = (
     <div>
