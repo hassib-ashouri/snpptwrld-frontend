@@ -1,10 +1,11 @@
-import {
-	CognitoUserPool,
+import
+{
+    CognitoUserPool,
     CognitoUserAttribute,
     CognitoUser,
     AuthenticationDetails
 } from 'amazon-cognito-identity-js';
-import {config, CognitoIdentityCredentials} from 'aws-sdk';
+import { config, CognitoIdentityCredentials } from 'aws-sdk';
 import awsConfig from '../../aws-exports';
 
 // configuring the identify pool (federated idenetity)
@@ -19,29 +20,62 @@ const userPool = new CognitoUserPool({
 
 
 
+
+function helperGetSessionOf(_user)
+{
+    return new Promise((resolve, reject) =>
+    {
+        _user.getSession(
+            (error, session) =>
+            {
+                if (error)
+                {
+                    return reject(error);
+                }
+
+                return resolve(session);
+            }
+        )
+    })
+}
+
+function helperGetUserAttributesOf(_user)
+{
+    return new Promise(
+        (resolve, reject) =>
+        {
+            _user.getUserAttributes(
+                (err, attributes) => 
+                {
+                    if (err)
+                    {
+                        return reject(err)
+                    }
+
+                    return resolve(attributes);
+                });
+        }
+    )
+}
+
+
 /**
  * see if this device was logged in before
  * @returns {bool} whether the device was logged in or not.
  */
- export async function wasDeviceLoggedIn()
+export function wasDeviceLoggedIn()
 {
-    return new Promise((resolve, reject) => {
-        
-        let user = userPool.getCurrentUser();
-        if(user !== null)
+    return new Promise(
+        async (resolve, reject) =>
         {
-            user.getSession(
-                (err, session) => 
-                {
-                    if (err)
-                    {
-                        throw err.message || JSON.stringify(err);
-                    }
-        
-                    console.log("Session Validity", session.isValid());
-                    // recreate credentials from the token.
-                    // needed in case user reopens the website after closing it
-                    config.credentials = new CognitoIdentityCredentials(
+            let user = userPool.getCurrentUser();
+            if (user !== null)
+            {
+                let session = await helperGetSessionOf(user);
+                console.log("Session Validity", session.isValid());
+                // recreate credentials from the token.
+                // needed in case user reopens the website after closing it
+                config.credentials = new CognitoIdentityCredentials(
                     {
                         IdentityPoolId: awsConfig.cognito.IDENTITY_POOL_ID, // your identity pool id here
                         Logins: {
@@ -49,36 +83,28 @@ const userPool = new CognitoUserPool({
                             [`cognito-idp.${awsConfig.cognito.REGION}.amazonaws.com/${awsConfig.cognito.USER_POOL_ID}`]: session.getIdToken().getJwtToken(),
                         },
                     });
-                });
-            
-            // authenticate using the updated credentials
-            config.credentials.refresh(
-                err => 
-                {
-                    if(err)
+                // authenticate using the updated credentials
+                config.credentials.refresh(
+                    err => 
                     {
-                        throw err.message || JSON.stringify(err);
-                    }
+                        if (err)
+                        {
+                            throw err.message || JSON.stringify(err);
+                        }
 
-                    console.log("Logged in with no broblem");
-                });
-            
-            user.getUserAttributes(
-                (err, attributes) => 
-                {
-                    if(err)
-                    {
-                        throw err.message || JSON.stringify(err);
-                    }
-                    let [,, nameAtt] = attributes;
-                    resolve({wasLoggedIn: true, name: nameAtt.Value});
-                });
+                        console.log("Logged in with no broblem");
+                    });
+
+                let [, , nameAtt] = await helperGetUserAttributesOf(user);
+                resolve({ name: nameAtt.Value, sessionInfo: session });
+            }
+            else
+            {
+                reject("No valid tokens in storage.");
+            }
+
         }
-        else
-        { 
-            reject("No valid tokens in storage.");
-        }
-    });
+    )
 }
 
 /**
@@ -88,7 +114,8 @@ const userPool = new CognitoUserPool({
  */
 export async function signUp(userData)
 {
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) =>
+    {
         let attributesList = [];
         let emailData = {
             Name: 'email',
@@ -100,17 +127,18 @@ export async function signUp(userData)
             Value: '+1' + userData.phone
         }
         let phoneAtt = new CognitoUserAttribute(phoneData);
-    
+
         let nameData = {
             Name: 'name',
             Value: `${userData.fname} ${userData.lname}`
         }
         let nameAtt = new CognitoUserAttribute(nameData);
-    
+
         attributesList.push(emailAtt, phoneAtt, nameAtt);
-    
-        userPool.signUp(userData.username, userData.password, attributesList, null, (err, result) => {
-            if(err)
+
+        userPool.signUp(userData.username, userData.password, attributesList, null, (err, result) =>
+        {
+            if (err)
             {
                 alert(err.message || JSON.stringify(err));
                 reject(err);
@@ -121,9 +149,16 @@ export async function signUp(userData)
     });
 }
 
-export async function logIn(userCredentials)
+/**
+ * authenticate the user and get the session infor
+ * @param {{username:string, password:string}} userCredentials login info
+ * 
+ * @returns {{session,name,username}}
+ */
+export function logIn(userCredentials)
 {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) =>
+    {
         let authenticaitonDetails = new AuthenticationDetails({
             Username: userCredentials.username,
             Password: userCredentials.password
@@ -135,7 +170,7 @@ export async function logIn(userCredentials)
         });
 
         congnitoUser.authenticateUser(authenticaitonDetails, {
-            onSuccess: result => 
+            onSuccess: async result => 
             {
                 console.log(result);
                 // get the session data
@@ -149,9 +184,9 @@ export async function logIn(userCredentials)
                         [`cognito-idp.${awsConfig.cognito.REGION}.amazonaws.com/${awsConfig.cognito.USER_POOL_ID}`]: idToken,
                     },
                 });
-                
+
                 //refreshes credentials using AWS.CognitoIdentity.getCredentialsForIdentity()
-		        config.credentials.refresh(
+                config.credentials.refresh(
                     error => 
                     {
                         if (error) 
@@ -161,22 +196,15 @@ export async function logIn(userCredentials)
                         }
 
                     });
-                    
-                congnitoUser.getUserAttributes(
-                    (err, atts) =>
-                    {
-                        if (err) 
-                        {
-                            reject(err.message || JSON.stringify(err))
-                            return;
-                        }
-                        let [,, nameAtt] = atts;
-                        console.log(atts);
-                        resolve({session: accessToken, name: nameAtt.Value});
-                    });
-                
+
+                let atts = await helperGetUserAttributesOf(congnitoUser);
+                let [, , nameAtt] = atts;
+                console.log(atts);
+                resolve({ session: accessToken, name: nameAtt.Value, username: userCredentials.username });
+
             },
-            onFailure: err => {
+            onFailure: err =>
+            {
                 reject(err.message || JSON.stringify(err));
                 return;
             }
@@ -188,7 +216,7 @@ export async function logIn(userCredentials)
 export function logUserOut()
 {
     let user = userPool.getCurrentUser();
-    if(user !== null)
+    if (user !== null)
     {
         user.signOut();
         return true;
