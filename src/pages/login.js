@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -13,9 +13,11 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import * as LoginUtils from '../components/loginUtils';
-import { navigate } from '@reach/router';
+import { navigate } from "@reach/router";
+import { userContext, SIGN_IN, UserContextProvider } from '../context/userContext';
 
-function Copyright() {
+function Copyright()
+{
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
@@ -53,38 +55,45 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function LogInPage() {
+export default function LogInPage(props)
+{
   const classes = useStyles();
+  const context = useContext(userContext);
+  const {state, dispatch} = context;
+  
   const [formInputData, setFormInputData] = useState({});
   // handler to update state when input fields are filled
-  const inputDataHandler = dataKey => event => {
-    let newFormInputData = {...formInputData};
+  const inputDataHandler = dataKey => event =>
+  {
+    let newFormInputData = { ...formInputData };
     newFormInputData[dataKey] = event.target.value;
     setFormInputData(newFormInputData);
   }
-
-  const signInHandler = () => {
+  
+  
+  // click sign in handler
+  const signInHandler = () =>
+  {
     // form validateion can happen here
-    console.log("Logging in as", formInputData.username);
-    LoginUtils.logIn(formInputData).then( ({session, name}) => {
-      console.log("User Logged in successfull", name);
-      navigate('/', {
-        state: {
-          st_isLoggedIn: true, 
-          name:name, 
-          session: session,
-          username: formInputData.username
-        }
-      });
-    },
-    error => {
-      console.error(error.message || JSON.stringify(error));
-    });
+    // login if successful update state and navigate
+    LoginUtils.logIn({
+      username: formInputData.username,
+      password: formInputData.password,
+    }).then(
+      loggedInUserInfo => 
+      {
+        console.log("The context from login page:", context);
+        dispatch({ type: SIGN_IN, payload: { ...loggedInUserInfo }});
+        navigate('/');
+      },
+      reason =>
+      {
+        alert(reason);
+      }
+    )
   };
 
-  useEffect(() => {
-    console.log(formInputData);
-  })
+  useEffect(() => console.log("The context from login page:", context));
 
   return (
     <Container component="main" maxWidth="xs">
