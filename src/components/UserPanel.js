@@ -93,8 +93,8 @@ function LoggedOutPanel(props)
 
 export default function UserPanel(props)
 {
-    const { state } = useContext(userContext);
-    let toRender = state.isLoggedIn ? (<LoggedInPanel />) : (<LoggedOutPanel />);
+    const { state:{isLoggedIn} = {isLoggedIn: false} } = useContext(userContext);
+    let toRender = isLoggedIn ? (<LoggedInPanel />) : (<LoggedOutPanel />);
     return (
         <>
             {toRender}
