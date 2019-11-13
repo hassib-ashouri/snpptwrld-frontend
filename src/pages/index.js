@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react"
 import AppBar from "@material-ui/core/AppBar"
-import CssBaseline from "@material-ui/core/CssBaseline"
 import Divider from "@material-ui/core/Divider"
 import Drawer from "@material-ui/core/Drawer"
 import InputBase from "@material-ui/core/InputBase"
@@ -197,7 +196,6 @@ function App(props)
 
   return (
     <div className={classes.root}>
-      <CssBaseline />
       <AppBar position="fixed" className={classes.appBar}>
       <Toolbar>
           <Typography variant="h6" noWrap>
