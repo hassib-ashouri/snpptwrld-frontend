@@ -58,7 +58,7 @@ export default function SnpptListView(props) {
       />
       <Grid container spacing={3}>
         {snppts.map(snppt => (
-          <Grid item xs={12}>
+          <Grid item xs={12} key={snppt.id}>
             <Card className={classes.card}>
               <CardHeader title={snppt.title} subheader="by this dude" />
               <CardActions>
