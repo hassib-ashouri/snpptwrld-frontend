@@ -15,6 +15,7 @@ import Toolbar from "@material-ui/core/Toolbar"
 import Typography from "@material-ui/core/Typography"
 import { makeStyles, fade } from "@material-ui/core/styles"
 import UserPanel from '../components/UserPanel'
+import SEO from '../components/seo';
 
 const drawerWidth = 240
 
@@ -196,6 +197,7 @@ function App(props)
 
   return (
     <div className={classes.root}>
+      <SEO title={"Home"} />
       <AppBar position="fixed" className={classes.appBar}>
       <Toolbar>
           <Typography variant="h6" noWrap>

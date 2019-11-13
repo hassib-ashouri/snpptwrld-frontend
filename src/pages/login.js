@@ -15,6 +15,7 @@ import Container from '@material-ui/core/Container';
 import * as LoginUtils from '../components/loginUtils';
 import { navigate } from "@reach/router";
 import { userContext, SIGN_IN, UserContextProvider } from '../context/userContext';
+import SEO from '../components/seo'
 
 function Copyright()
 {
@@ -97,7 +98,7 @@ export default function LogInPage(props)
 
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline />
+      <SEO title={"Log In"} />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />

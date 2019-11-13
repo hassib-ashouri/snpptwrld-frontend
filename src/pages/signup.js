@@ -14,6 +14,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import * as AuthUtils from '../components/loginUtils';
 import { navigate } from '@reach/router';
+import SEO from '../components/seo'
 
 function Copyright() {
   return (
@@ -83,7 +84,7 @@ export default function SignUp() {
   
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline />
+      <SEO title={"Sign Up"} />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />
