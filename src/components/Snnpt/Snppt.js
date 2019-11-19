@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Prism from "prismjs";
 import "./prism.css";
 
+
 export default function Snnpt(props){
 
     useEffect(() => {
@@ -9,7 +10,8 @@ export default function Snnpt(props){
     }, [])
 
     return(
-        <div>
+        <div className="Snppt">
+
             <pre>
                 <code className="language-javascript">
                     {`
