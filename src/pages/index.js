@@ -16,6 +16,7 @@ import Typography from "@material-ui/core/Typography"
 import { makeStyles, fade } from "@material-ui/core/styles"
 import UserPanel from '../components/UserPanel'
 import SEO from '../components/seo';
+import {getSnppts} from '../components/api'
 
 const drawerWidth = 240
 
@@ -125,9 +126,8 @@ function App(props)
   // the list of snippets
   const filters = ["Java", "Python", "Java Script", "Bash"];
   
-  const [snppts, setSnppts] = useState(
-    passedSnppts === undefined ? fakeSnppts : passedSnppts
-  )
+  const [snppts, setSnppts] = useState([]);
+  getSnppts().then(response => setSnppts(response))
   // hold filtered snppts according to the selected toggles
   const [filteredSnppts, setFilteredSnppts] = useState(snppts)
   const handleFilterToggele = value => () => {
