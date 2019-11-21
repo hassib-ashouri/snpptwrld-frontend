@@ -15,6 +15,8 @@ import Toolbar from "@material-ui/core/Toolbar"
 import Typography from "@material-ui/core/Typography"
 import { makeStyles, fade } from "@material-ui/core/styles"
 import UserPanel from '../components/UserPanel'
+import SEO from '../components/seo';
+import {getSnppts} from '../components/api'
 
 const drawerWidth = 240
 
@@ -79,33 +81,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const fakeSnppts = [
-  {
-    id: "1",
-    title: "Ext. A sample javas snppt",
-    resource: "/lskdjf",
-    lang: "Java",
-  },
-  {
-    id: "2",
-    title: "Ext. A sample Python snppt",
-    resource: "/lskdj",
-    lang: "Python",
-  },
-  {
-    id: "3",
-    title: "Ext. A sample Bash snppt",
-    resource: "/lskdjf",
-    lang: "Bash",
-  },
-  {
-    id: "4",
-    title: "Ext. A sample Java script snppt",
-    resource: "/lskdjf",
-    lang: "Java Script",
-  },
-];
-
 function App(props)
 {
   // destructuring the passed data
@@ -124,9 +99,7 @@ function App(props)
   // the list of snippets
   const filters = ["Java", "Python", "Java Script", "Bash"];
   
-  const [snppts, setSnppts] = useState(
-    passedSnppts === undefined ? fakeSnppts : passedSnppts
-  )
+  const [snppts, setSnppts] = useState(getSnppts());
   // hold filtered snppts according to the selected toggles
   const [filteredSnppts, setFilteredSnppts] = useState(snppts)
   const handleFilterToggele = value => () => {
@@ -196,6 +169,7 @@ function App(props)
 
   return (
     <div className={classes.root}>
+      <SEO title={"Home"} />
       <AppBar position="fixed" className={classes.appBar}>
       <Toolbar>
           <Typography variant="h6" noWrap>

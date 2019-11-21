@@ -6,6 +6,7 @@ import Grid from "@material-ui/core/Grid"
 import { CardHeader } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
 import SnpptViewDialog from "../components/SnpptViewDialog"
+import Snppt from "./Snnpt/Snppt"
 
 const useStyles = makeStyles(theme => ({
   // sttyling for this component is here
@@ -74,6 +75,7 @@ export default function SnpptListView(props) {
           </Grid>
         ))}
       </Grid>
+      
     </>
   )
 }
