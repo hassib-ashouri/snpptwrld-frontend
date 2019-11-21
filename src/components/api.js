@@ -3,7 +3,7 @@ import path from "../../aws-exports"
 const axios = require('axios');
  
 // Want to use async/await? Add the `async` keyword to your outer function/method.
-export async function getSnppts() {
+export function getSnppts() {
   
   // try {
   //   const response = await axios.get(path.api.endpoint + 'snppts');

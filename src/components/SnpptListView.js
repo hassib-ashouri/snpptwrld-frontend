@@ -71,7 +71,6 @@ export default function SnpptListView(props) {
                   Display
                 </Button>
               </CardActions>
-              <Snppt></Snppt>
             </Card>
           </Grid>
         ))}
