@@ -55,8 +55,21 @@ Run the app
 `npm start`
 
 ## Screenshots
+
 ### Homepage
-![Home page](https://drive.google.com/file/d/1s9t_9uOTbd3wS_ci-SgHfDntUAopqtLj/view?usp=sharing)
+<img src="https://github.com/hassib-ashouri/snpptwrld-frontend/blob/dev/pics/homepage.png" width="600"/>
+
+### Homapage - logged in user
+<img src="https://github.com/hassib-ashouri/snpptwrld-frontend/blob/dev/pics/homepage-loggedin.png" width="600"/>
+
+### Sign in
+<img src="https://github.com/hassib-ashouri/snpptwrld-frontend/blob/dev/pics/login.png" width="600"/>
+
+### Sign up
+<img src="https://github.com/hassib-ashouri/snpptwrld-frontend/blob/dev/pics/signup.png" width="600"/>
+
+### View snppt
+<img src="https://github.com/hassib-ashouri/snpptwrld-frontend/blob/dev/pics/view-snppt.png" width="600"/>
 
 ## Usage
 
