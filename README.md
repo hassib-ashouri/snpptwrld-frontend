@@ -71,12 +71,13 @@ Run the app
 ### View snppt
 <img src="https://github.com/hassib-ashouri/snpptwrld-frontend/blob/dev/pics/view-snppt.png" width="600"/>
 
-## Usage
+## Run locally
 
-Once you see the app is running, you should be able to see the app page:
-
-
-Now you can sign up as a user and log in:
+```
+git clone https://github.com/hassib-ashouri/snpptwrld-frontend
+npm i
+npm run develope
+```
 
 
 
