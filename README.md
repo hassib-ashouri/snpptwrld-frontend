@@ -54,6 +54,10 @@ After `npm install` runs successfully, you should have already installed all the
 Run the app
 `npm start`
 
+## Screenshots
+### Homepage
+![Home page](https://drive.google.com/file/d/1s9t_9uOTbd3wS_ci-SgHfDntUAopqtLj/view?usp=sharing)
+
 ## Usage
 
 Once you see the app is running, you should be able to see the app page:
