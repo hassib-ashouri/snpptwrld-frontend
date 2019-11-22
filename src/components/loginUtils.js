@@ -6,16 +6,15 @@ import
     AuthenticationDetails
 } from 'amazon-cognito-identity-js';
 import { config, CognitoIdentityCredentials } from 'aws-sdk';
-import awsConfig from '../../aws-exports';
-
+console.log("The region is", process.env.GATSBY_COGNITO_REGION)
 // configuring the identify pool (federated idenetity)
-config.region = awsConfig.cognito.REGION;
+config.region = process.env.GATSBY_COGNITO_REGION;
 config.credentials = new CognitoIdentityCredentials({
-    IdentityPoolId: awsConfig.cognito.IDENTITY_POOL_ID
+    IdentityPoolId: process.env.GATSBY_COGNITO_IDENTITY_POOL_ID
 });
 const userPool = new CognitoUserPool({
-    UserPoolId: awsConfig.cognito.USER_POOL_ID,
-    ClientId: awsConfig.cognito.APP_CLIENT_ID
+    UserPoolId: process.env.GATSBY_COGNITO_USER_POOL_ID,
+    ClientId: process.env.GATSBY_COGNITO_APP_CLIENT_ID
 });
 
 
@@ -77,10 +76,10 @@ export function wasDeviceLoggedIn()
                 // needed in case user reopens the website after closing it
                 config.credentials = new CognitoIdentityCredentials(
                     {
-                        IdentityPoolId: awsConfig.cognito.IDENTITY_POOL_ID, // your identity pool id here
+                        IdentityPoolId: process.env.GATSBY_COGNITO_IDENTITY_POOL_ID, // your identity pool id here
                         Logins: {
                             // Change the key below according to the specific region your user pool is in.
-                            [`cognito-idp.${awsConfig.cognito.REGION}.amazonaws.com/${awsConfig.cognito.USER_POOL_ID}`]: session.getIdToken().getJwtToken(),
+                            [`cognito-idp.${process.env.REGION}.amazonaws.com/${process.env.GATSBY_COGNITO_USER_POOL_ID}`]: session.getIdToken().getJwtToken(),
                         },
                     });
                 // authenticate using the updated credentials
@@ -178,10 +177,10 @@ export function logIn(userCredentials)
                 let idToken = result.getIdToken().getJwtToken();
 
                 config.credentials = new CognitoIdentityCredentials({
-                    IdentityPoolId: awsConfig.cognito.IDENTITY_POOL_ID, // your identity pool id here
+                    IdentityPoolId: process.env.GATSBY_COGNITO_IDENTITY_POOL_ID, // your identity pool id here
                     Logins: {
                         // Change the key below according to the specific region your user pool is in.
-                        [`cognito-idp.${awsConfig.cognito.REGION}.amazonaws.com/${awsConfig.cognito.USER_POOL_ID}`]: idToken,
+                        [`cognito-idp.${process.env.REGION}.amazonaws.com/${process.env.GATSBY_COGNITO_USER_POOL_ID}`]: idToken,
                     },
                 });
 
